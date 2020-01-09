@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Introduction"
-author: "Student Name"
+author: Nikki Shintaku
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -22,21 +22,22 @@ The completed exercise is due on Tuesday, January 14th at 1:00 pm.
 
 1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I had some training in R during my undergraduate specifically with GIS applications. I used R to create graphs, maps, and imagery with environmental topics. I've also used Git for my research assistantship here at Duke to work on collaborative projects, but this is my first year familiarizing myself with Github. 
+
 
 2. Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I feel confident in my able to troubleshoot because I've had to do that a lot in my past experiences. However, I would like to continue to build on that skill of problem solving.
 
 3. Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: I feel apprehensive about making sure I can keep up with the learning new coding skills. I want to make sure I keep up with the pace of the class because I'm not too confident in my R coding skills. 
 
 
 ## 2) GitHub
 
 Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/nmshintaku/Environmental_Data_Analytics_2020
 
 
