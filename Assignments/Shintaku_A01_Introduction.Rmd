@@ -1,0 +1,43 @@
+---
+title: "Assignment 1: Introduction"
+author: Nikki Shintaku
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+## OVERVIEW
+
+This exercise accompanies the introductory material in Environmental Data Analytics. 
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+3. Work through the steps, **creating code and output** that fulfill each instruction.
+4. Be sure to **answer the questions** in this assignment document.
+6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
+8. After Knitting, submit the completed exercise (PDF file) to the dropbox in Sakai. Add your last name into the file name (e.g., "Salk_A03_Introduction.Rmd") prior to submission.
+
+The completed exercise is due on Tuesday, January 14th at 1:00 pm.
+
+## 1) Discussion Questions
+
+1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
+
+> Answer: I had some training in R during my undergraduate specifically with GIS applications. I used R to create graphs, maps, and imagery with environmental data, such as precipitation, species distribution, and Landsat images. I've also used Git for my research assistantship here at Duke to work on collaborative projects, but this is my first year familiarizing myself with Github. 
+
+
+2. Are there any components of the course about which you feel confident?
+
+> Answer: I feel confident in my able to troubleshoot because I've had to do that a lot in my past experiences. However, I would like to continue to build on that skill of problem solving.
+
+3. Are there any components of the course about which you feel apprehensive?
+
+> Answer: I feel apprehensive about making sure I am understanding what I am coding. Often I am able to troubleshoot coding issues through posts on outside platforms, but I do not take the time to understand what exactly is wrong and why my code didn't work. I want to make sure I can keep up with learning R code also while understanding it. 
+
+
+## 2) GitHub
+
+Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
+
+> Answer: https://github.com/nmshintaku/Environmental_Data_Analytics_2020
+
+
