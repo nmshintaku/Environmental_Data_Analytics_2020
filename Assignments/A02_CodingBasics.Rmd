@@ -40,7 +40,7 @@ meanseq <- mean(question1) #mean of sequence
 medseq <- median(question1) #median of sequence
 
 #3. 
-meanseq > medseq #stating the mean is greater than the median, it is false
+meanseq > medseq #stating the mean is greater than the median, answer: false
 
 ```
 
@@ -55,21 +55,33 @@ meanseq > medseq #stating the mean is greater than the median, it is false
 8. Label the columns of your data frame with informative titles.
 
 ```{r}
+names <- c("Claire", "Masha", "Nikki", "Kathleen") #character vector
+scores <- c(95, 90, 85, 97) #numeric vector
+passed <- c(TRUE, TRUE, TRUE, TRUE) #logical vector 
+
+student_tests <- data.frame(names,scores,passed) #created a dataframe with all vectors
+names(student_tests) <- c("Name","Score","Passed") #named columns of dataframe
 
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> Answer: 
+> Answer: A dataframe is a collection of different types of data (numeric, logical, character) with column names and row names. A matrix contains all of the same type of data. 
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. Hint: Use `print`, not `return`. The name of your function should be informative.
+
+```{r}
+test_scores <- function(x) {
+  ifelse(x<50,"FALSE", "TRUE")
+  }
+```
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
-
+test_scores(scores)
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer: 
+> Answer: The 'ifelse' correctly worked instead of the 'if' and 'else'. When I used the 'if' and 'else' inside the function, I got an error answer that only the first element will be used. The 'ifelse' works with logical vectors with lengths greater than one. 
