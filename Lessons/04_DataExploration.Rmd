@@ -46,8 +46,8 @@ At the top of your R scripts, you should load any packages that need to be used 
 
 At the same time, you should also load your theme if you are doing any data visualization with ggplot. More on this later.
 
-```{r, message = FALSE}
-# Load package
+```{r, message = FALSE} 
+# Load package, put message = F so it doesn't inclue the message when you are knitting
 library(tidyverse)
 ```
 
@@ -67,7 +67,7 @@ You may also import datasets from the Files tab, but this is not recommended sin
 USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 # What happens if we don't assign a name to our imported dataset?
-#read.csv("../Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+#read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 # Another option is to choose with your browser
 # read.csv(file.choose())
@@ -80,7 +80,7 @@ USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 ## EXPLORE YOUR DATASET
 
 Take a moment to read through the README file associated with the USGS dataset on discharge at the Eno River. Where can you find this file? How does the placement and information found in this file relate to the best practices for reproducible data analysis?
-> ANSWER: 
+> ANSWER: This file can be found in the data file folder under metadata. The information in this file is important for reproducible data because it provides the reader/user with information, such as where data was collected, when it was collected, and how it was collected. It better informs the user on exactly what the csv file contains and the meaning behind the data. 
 
 ```{r}
 View(USGS.flow.data)
@@ -115,7 +115,7 @@ summary(USGS.flow.data)
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> Answer: 
+> Answer: Numeric became NA and factor stayed blank 
 
 ## Adjusting Datasets
 
@@ -129,7 +129,8 @@ summary(USGS.flow.data$gage.height.mean)
 ```
 Question: What types of research questions might make it favorable to remove NAs from a dataset, and what types of research questions might make it favorable to retain NAs in the dataset?
 
-> Answer: 
+> Answer: presence vs absence data you could remove NAs
+corralation matrix --> remove NAs 
 
 ```{r}
 USGS.flow.data.complete <- na.omit(USGS.flow.data)
@@ -160,6 +161,7 @@ Formatting of dates in R:
 In some cases when dates are provided as integers, you may need to provide an origin for your dates. Beware: the "origin" date for Excel (Windows), Excel (Mac), R, and MATLAB all have different origin dates. Google this if it comes up.
 
 ```{r}
+#Origin Date in R is Jan 1, 1970
 help(as.Date)
 
 # Adjust date formatting for today
@@ -168,9 +170,9 @@ help(as.Date)
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
-#format(today, format = "")
-#format(today, format = "")
+format(today, format = "%Y")
+format(today, format = "%m")
+format(today, format = "%d")
 
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y") 
 ```
@@ -178,17 +180,17 @@ USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y")
 Note that for every date prior to 1969, R has assigned the date in the 2000s rather than the 1900s. This can be fixed with an `ifelse` statement inside a function. Run through the code below and write what is happening in the comment above each line.
 
 ```{r}
-# 
+# We are formatting the data as year-2digit, month, day
 USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
 
-#
+#paste 19 if the input is greater than 181231 or 20 if it is less than 
 create.early.dates <- (function(d) {
        paste0(ifelse(d > 181231,"19","20"),d)
        })
-#
+#run the function on the USGS flow data for the datatime column
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
 
-#
+#now reformat as a data in the format that we want
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d") 
 
 ```
