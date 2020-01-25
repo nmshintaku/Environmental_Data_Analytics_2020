@@ -1,6 +1,6 @@
 ---
 title: "Assignment 3: Data Exploration"
-author: "Student Name"
+author: "Nikki Shintaku"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -22,8 +22,15 @@ The completed exercise is due on Tuesday, January 28 at 1:00 pm.
 ## Set up your R session
 
 1. Check your working directory, load necessary packages (tidyverse), and upload two datasets: the ECOTOX neonicotinoid dataset (ECOTOX_Neonicotinoids_Insects_raw.csv) and the Niwot Ridge NEON dataset for litter and woody debris (NEON_NIWO_Litter_massdata_2018-08_raw.csv). Name these datasets "Neonics" and "Litter", respectively. 
-```{r,  message = FALSE}
+```{r setup,  message = FALSE}
+getwd()
+setwd("/Users/nikkishintaku/Desktop/Environmental872/Environmental_Data_Analytics_2020")
 
+library(tidyverse)
+
+#reading in Neonics and Litter datasets 
+Neonics <- read.csv("/Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
+Litter <- read.csv("/Data/Raw/NEON_NIWO_Litter_massdata_2018-08_raw.csv")
 ```
 
 ## Learn about your system
