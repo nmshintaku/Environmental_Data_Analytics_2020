@@ -19,7 +19,7 @@ Today we will work with a dataset from the [North Temperate Lakes Long-Term Ecol
 
 Opening discussion: why might we be interested in long-term observations of temperature, oxygen, and light in lakes?
 
-> Add notes here: 
+> Add notes here: You can track changes in ecosystem health, human interactions with the lake, and trend changes in each of these measurements. Tracking trends can influence policy and adaptation strategies. 
 
 ```{r, message = FALSE}
 getwd()
@@ -62,27 +62,27 @@ vignette("dplyr")
 Filtering allows us to choose certain rows (observations) in our dataset.
 
 Here are the relevant commands used in the `filter` function. Add some notes to designate what these commands mean. 
-`==`
-`!=`
-`<`
-`<=`
-`>`
-`>=`
-`&`
-`|`
+`==` equal to 
+`!=` not equal to 
+`<` less than
+`<=` less than or equal to 
+`>`greater than
+`>=` greater than or equal to 
+`&` and 
+`|` or
 
 ```{r}
 class(NTL.phys.data$lakeid)
 class(NTL.phys.data$depth)
 
 # matrix filtering
-NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,]
+NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,] #all rows where depth = 0 with all the columns 
 
 # dplyr filtering
 NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0)
 NTL.phys.data.surface3 <- filter(NTL.phys.data, depth < 0.25)
 
-# Did the methods arrive at the same result?
+# Did the methods arrive at the same result? Yes, it does 
 head(NTL.phys.data.surface1)
 dim(NTL.phys.data.surface1)
 head(NTL.phys.data.surface2)
@@ -108,17 +108,20 @@ NTL.phys.data.JunethruOctober4 <- filter(NTL.phys.data, daynum %in% c(152:304))
 
 # Exercise: 
 # filter NTL.phys.data for the year 1999
+NTL.phys.data.1999 <- filter(NTL.phys.data, year4 == "1999")
 # what code do you need to use, based on the class of the variable?
 class(NTL.phys.data$year4)
 
 # Exercise: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
-
+NTL.phys.data.Tuesday <- filter(NTL.phys.data, 
+                                lakename == "Tuesday Lake" & 
+                                year4 >= 1990 & year4 <= 1999)
 
 ```
 Question: Why don't we filter using row numbers?
 
-> Answer: 
+> Answer: Rows could change if you dataset changes. Use filter to meet certain conditions or attributes/
 
 ### Arrange
 
@@ -130,8 +133,9 @@ NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
 
 # Exercise: 
 # Arrange NTL.phys.data by temperature, in descending order. 
+NTL.phys.data.temp.descending <- arrange(NTL.phys.data, desc(temperature_C))
 # Which dates, lakes, and depths have the highest temperatures?
-
+#East Long and Hummingbird Lake have the highest temperatures with the day number around 182-200 (summer) and depths of zero and 0.5 (shallow)
 
 ```
 ### Select
@@ -140,7 +144,9 @@ Selecting allows us to choose certain columns (variables) in our dataset.
 
 ```{r}
 NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C)
-
+#select columns lakename and sampledate through temperature_C columns
+# : means through
+#either all include or all exclude; to exlcude use -
 ```
 ### Mutate
 
