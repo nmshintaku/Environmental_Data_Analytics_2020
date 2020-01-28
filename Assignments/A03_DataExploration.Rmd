@@ -22,34 +22,37 @@ The completed exercise is due on Tuesday, January 28 at 1:00 pm.
 ## Set up your R session
 
 1. Check your working directory, load necessary packages (tidyverse), and upload two datasets: the ECOTOX neonicotinoid dataset (ECOTOX_Neonicotinoids_Insects_raw.csv) and the Niwot Ridge NEON dataset for litter and woody debris (NEON_NIWO_Litter_massdata_2018-08_raw.csv). Name these datasets "Neonics" and "Litter", respectively. 
-```{r setup,  message = FALSE}
+```{r setup,  message = FALSE, echo = TRUE}
 getwd()
-setwd("/Users/nikkishintaku/Desktop/Environmental872/Environmental_Data_Analytics_2020")
 
+library(knitr)
+opts_knit$set(root.dir = "/Users/nikkishintaku/Desktop/Environmental872/Environmental_Data_Analytics_2020")
+```
+
+```{r, message=FALSE}
 library(tidyverse)
 
 #reading in Neonics and Litter datasets 
-Neonics <- read.csv("/Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
-Litter <- read.csv("/Data/Raw/NEON_NIWO_Litter_massdata_2018-08_raw.csv")
+Neonics <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
+Litter <- read.csv("./Data/Raw/NEON_NIWO_Litter_massdata_2018-08_raw.csv")
 ```
 
 ## Learn about your system
 
-2. The neonicotinoid dataset was collected from the Environmental Protection Agency's ECOTOX Knowledgebase, a database for ecotoxicology research. Neonicotinoids are a class of insecticides used widely in agriculture. The dataset that has been pulled includes all studies published on insects. Why might we be interested in the ecotoxicologoy of neonicotinoids on insects? Feel free to do a brief internet search if you feel you need more background information. 
+2. The neonicotinoid dataset was collected from the Environmental Protection Agency's ECOTOX Knowledgebase, a database for ecotoxicology research. Neonicotinoids are a class of insecticides used widely in agriculture. The dataset that has been pulled includes all studies published on insects. Why might we be interested in the ecotoxicology of neonicotinoids on insects? Feel free to do a brief internet search if you feel you need more background information. 
 
-> Answer: 
+> Answer: If companies are using neonicotinoids as insecticides on agriculture, then we need to know the ecotoxicology of them in order to assess if the neonicotinoids are going to be harmful to us when we eat the crops they are put on. We also would need to make sure that it is targeting the correct insect and not harming other animals. 
 
 3. The Niwot Ridge litter and woody debris dataset was collected from the National Ecological Observatory Network, which collectively includes 81 aquatic and terrestrial sites across 20 ecoclimatic domains. 32 of these sites sample forest litter and woody debris, and we will focus on the Niwot Ridge long-term ecological research (LTER) station in Colorado. Why might we be interested in studying litter and woody debris that falls to the ground in forests? Feel free to do a brief internet search if you feel you need more background information. 
 
-> Answer: 
+> Answer: Studying litter and woody debris that falls to the ground is important data that can be used to estimate annual aboveground net primary productivity and aboveground biomass in the region. It can also help to understand vegetative carbon fluxes over time in the particular ecoclimate domain. Litter and woody debris hold an important role in carbon budgets and nutrient cycling.
 
 4. How is litter and woody debris sampled as part of the NEON network? Read the NEON_Litterfall_UserGuide.pdf document to learn more. List three pieces of salient information about the sampling methods here: 
 
 > Answer: 
-*
-*
-*
-
+*Sampling locations were selected randomly and sampling occurred in tower plots. In sites with forested tower airsheds, there was 20 40mX40m plots. In sites with low-statured vegetation, there was 4 40mx40m plots and 26 20mx20m plots.  
+*There was one elevated and one ground trap was deployed for every 400m^2 plot area. Trap placements within plots were targeted or randomized, depending on vegetation
+*Ground traps were sampled once per year. Elevated traps sampling frequency varied by vegetation present at the site with 1x every 2 weeks in deciduous forest and 1x every 1-2 months in evergreen sites.
 
 
 ## Obtain basic summaries of your data (Neonics)
@@ -57,88 +60,109 @@ Litter <- read.csv("/Data/Raw/NEON_NIWO_Litter_massdata_2018-08_raw.csv")
 5. What are the dimensions of the dataset?
 
 ```{r}
-
+#dimensions of Neonics
+dim(Neonics)
 ```
 
 6. Using the `summary` function, determine the most common effects that are studied. Why might these effects specifically be of interest?
 ```{r}
-
+#summary of only the Effects column of the Neonics dataset
+summary(Neonics$Effect) #effect group 
+summary(Neonics$Effect.Measurement) #effect and measurement
 ```
 
-> Answer: 
+> Answer: The most common effect is population and mortality with the most common effect and measurement being abundance and mortality. Using the summary function is an easy way to quickly see how many cases of each effect were found in all the studies about the effects of neonicotinoids on insects. This gives a clear idea of more specific effects the neonicotinoids have on insects and can be used to steer further research and understanding of how it can help or hurt agriculture growth. 
 
 7. Using the `summary` function, determine the six most commonly studied species in the dataset (common name). What do these species have in common, and why might they be of interest over other insects? Feel free to do a brief internet search for more information if needed.
 
 ```{r}
-
+summary(Neonics$Species.Common.Name)
 ```
 
-> Answer: 
+> Answer: The six most commonly studied species are Honey Bee, Parasitic Wasp, Buff Trailed Bumblbee, Carniolan Honey Bee, Bumble Bee, and Italian Honeybee. All of these species, except the parasitic wasp, is a pollinator. Pollinators are important for plants to reproduce and grow so studying the effects of neonicotinoids on these pollinators is of interest to make sure the insecticide aren't harming their presence.
 
 8. Concentrations are always a numeric value. What is the class of Conc.1..Author. in the dataset, and why is it not numeric?
 
 ```{r}
-
+class(Neonics$Conc.1..Author.)
 ```
 
-> Answer:
-
+> Answer: The class of Conc.1..Author is a factor because each of the numbers have a / placed after it, thus, it can not be classed as numeric. 
 
 
 ## Explore your data graphically (Neonics)
 
 9. Using `geom_freqpoly`, generate a plot of the number of studies conducted by publication year. 
 ```{r}
-
+ggplot(Neonics) +
+  geom_freqpoly(aes(x=Publication.Year), color="Purple")+
+  labs(x="Publication Year", y="Count")
 ```
 
 10. Reproduce the same graph but now add a color aesthetic so that different Test.Location are displayed as different colors.
 ```{r}
-
+ggplot(Neonics) +
+  geom_freqpoly(aes(x = Publication.Year, color = Test.Location ))+
+  labs(x="Publication Year", y="Count")
 ```
 
 Interpret this graph. What are the most common test locations, and do they differ over time?
 
-> Answer: 
+> Answer: The most common test location was a lab, and the second most common was in the field naturally. Between the 1990s and 2000s, field natural was used more than the lab, but as time continued into the 2010s, lab as the test location increased greatly.
 
 11. Create a bar graph of Endpoint counts. What are the two most common end points, and how are they defined? Consult the ECOTOX_CodeAppendix for more information. 
 
 ```{r}
-
+ggplot(Neonics)+
+  geom_bar(aes(x = Endpoint), fill = "blue1")
 ```
 
-> Answer: 
->
+> Answer: The two most common end points are NOEL and LOEL. NOEL stands for no-observable-effect-level. This means that the higest dose producing effects are not siginificantly different from the reponses of controls. LOEL stands for lowest-observable-effect level. This means the lowest dose producing effects that were significantly different from reponse of controls. 
+
 
 ## Explore your data (Litter)
 
 12. Determine the class of collectDate. Is it a date? If not, change to a date and confirm the new class of the variable. Using the `unique` function, determine which dates litter was sampled in August 2018. 
 ```{r}
+class(Litter$collectDate) #class is factor 
+#change from factor to date format
+Litter$collectDate <- as.Date(Litter$collectDate, format = "%Y-%m-%d")
+class(Litter$collectDate) #class is a date
 
+#Use Unique function to see what dates were sampled in August 2018
+august_2018 <- unique(format(Litter$collectDate, "2018-08-%d"))
+august_2018
 ```
 
 13. Using the `unique` function, determine how many plots were sampled at Niwot Ridge. How is the information obtained from `unique` different from that obtained from `summary`?
 
 ```{r}
-
+unique(Litter$plotID)
 ```
 
-> Answer: 
+> Answer: There were 12 plots that were sampled at Niwot Ridge. Information from Unique is different from Summary because Unique returns the names of all the different entries in the column that you want. Whereas Summary returns the number of times each of those entries comes up in the column. 
 
 14. Create a bar graph of functionalGroup counts. This shows you what type of litter is collected at the Niwot Ridge sites. Notice that litter types are fairly equally distributed across the Niwot Ridge sites.
 ```{r}
-
+ggplot(Litter)+
+  geom_bar(aes(x = functionalGroup), fill = "firebrick4")
 ```
 
 15. Using `geom_boxplot` and `geom_violin`, create a boxplot and a violin plot of dryMass by functionalGroup. 
 ```{r}
+#boxplot 
+ggplot(Litter) +
+  geom_boxplot(aes(x = functionalGroup, y = dryMass))
 
+#violin 
+ggplot(Litter)+
+  geom_violin(aes(x = functionalGroup, y = dryMass))
 ```
 
 Why is the boxplot a more effective visualization option than the violin plot in this case?
 
-> Answer: 
+> Answer: The violin plot does not show the distribution of the dry mass of each functional group as well as the boxplot does. The boxplot shows outliers and the skew of the data more so than the violin plot. 
 
 What type(s) of litter tend to have the highest biomass at these sites? 
 
-> Answer: 
+> Answer: Needles have a high biomass at these sites followed by litter that is mixed. 
