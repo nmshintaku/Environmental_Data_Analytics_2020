@@ -39,23 +39,29 @@ NTL.phys.data.PeterPaul$sampledate <- as.Date(NTL.phys.data.PeterPaul$sampledate
 # Select Peter and Paul Lakes from the nutrient dataset
 NTL.nutrient.data.PeterPaul <- filter(NTL.nutrient.data, lakename == "Paul Lake" | lakename == "Peter Lake")
 
+NTL.nutrient.data.PeterPaul <-
+  NTL.nutrient.data %>%
+  filter(lakename == "Paul Lake" | lakename == "Peter Lake")
+  droplevels()
+
 # Data summaries for nutrient data
 colnames(NTL.nutrient.data.PeterPaul)
 dim(NTL.nutrient.data.PeterPaul)
 str(NTL.nutrient.data.PeterPaul)
 summary(NTL.nutrient.data.PeterPaul$lakename) 
 # Notice that other lake names didn't go away, even though they have zero values
-NTL.nutrient.data.PeterPaul <- droplevels(NTL.nutrient.data.PeterPaul)
+NTL.nutrient.data.PeterPaul <- droplevels(NTL.nutrient.data.PeterPaul) #gets rid of the other objects we don't want in the df
 summary(NTL.nutrient.data.PeterPaul$lakename)
 summary(NTL.nutrient.data.PeterPaul$comments)
 class(NTL.nutrient.data.PeterPaul$sampledate)
 NTL.nutrient.data.PeterPaul$sampledate <- as.Date(NTL.nutrient.data.PeterPaul$sampledate, format = "%m/%d/%y")
 
+#How to Pipe
 NTL.nutrient.data.PeterPaul <- 
-  NTL.nutrient.data.PeterPaul %>% #
-  mutate(month = month(sampledate)) %>% #
-  select(lakeid:daynum, month, sampledate:comments) %>% # 
-  drop_na(depth)
+  NTL.nutrient.data.PeterPaul %>% #dataset name
+  mutate(month = month(sampledate)) %>% #add a month column
+  select(lakeid:daynum, month, sampledate:comments) %>% #reorder the columns with new month column 
+  drop_na(depth) #dropping all depth rows that have NA
 
 # Save processed nutrient file
 write.csv(NTL.nutrient.data.PeterPaul, row.names = FALSE, 
@@ -69,7 +75,7 @@ NTL.nutrient.data.PeterPaul.subset <- select(NTL.nutrient.data.PeterPaul,
                                              lakename, year4, daynum, month, sampledate, depth:po4)
 
 # write a more succinct line of code to subset the nutrient dataset. 
-
+NTL.nutrient.data.PeterPaul.subset <- select(NTL.nutrient.data.PeterPaul, lakename:sampledate, depth:po4)
 ```
 
 
@@ -86,19 +92,26 @@ Note: `tidyr` is moving away from `gather` and `spread` and toward `pivot_longer
 
 ```{r}
 # Gather nutrient data into one column
-NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.subset, "nutrient", "concentration", tn_ug:po4)
-NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered, !is.na(concentration))
+NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.subset,
+                                               "nutrient", "concentration", tn_ug:po4)
+
+#remove NAs in the concentration column
+NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered,
+                                               !is.na(concentration)) 
+
 count(NTL.nutrient.data.PeterPaul.gathered, nutrient)
 
 write.csv(NTL.nutrient.data.PeterPaul.gathered, row.names = FALSE, 
           file = "./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
 
 # Spread nutrient data into separate columns
-NTL.nutrient.data.PeterPaul.spread <- spread(NTL.nutrient.data.PeterPaul.gathered, nutrient, concentration)
+NTL.nutrient.data.PeterPaul.spread <- spread(NTL.nutrient.data.PeterPaul.gathered, 
+                                             nutrient, concentration)
 
 # Split components of cells into multiple columns
 # Opposite of 'separate' is 'unite'
-NTL.nutrient.data.PeterPaul.dates <- separate(NTL.nutrient.data.PeterPaul.subset, sampledate, c("Y", "m", "d"))
+NTL.nutrient.data.PeterPaul.dates <- separate(NTL.nutrient.data.PeterPaul.subset, 
+                                              sampledate, c("Y", "m", "d"))
 
 # I recommend using lubridate rather than separate and unite.
 
@@ -143,9 +156,11 @@ Litter.2019 <- rbind(Litter.June2016, Litter.July2016, Litter.August2016)
 However, there are 20 months in this dataset, so importing all these files individually would be tedious to code. Here is a more efficient way to import and combine all files.
 
 ```{r}
+#inputting all the litter files with a name followed by .csv
 LitterFiles = list.files(path = "./Data/Raw/NIWO_Litter/", pattern="*.csv", full.names=TRUE)
 LitterFiles
 
+#combine all the month files into one large file 
 Litter <- LitterFiles %>%
   ldply(read.csv)
 ```

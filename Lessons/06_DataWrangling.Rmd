@@ -187,7 +187,8 @@ NTL.phys.data.processed <-
   filter(lakename == "Paul Lake" | lakename == "Peter Lake") %>%
   select(lakename, sampledate:temperature_C) %>%
   mutate(temperature_F = (temperature_C*9/5) + 32)
-  
+
+#design a pipe by coding the df followed by %>%
 ```
 
 Notice that we did not place the dataset name inside the wrangling function but rather at the beginning.
