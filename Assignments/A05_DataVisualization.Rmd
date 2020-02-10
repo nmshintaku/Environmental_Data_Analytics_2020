@@ -66,10 +66,10 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 
 4. [NTL-LTER] Plot total phosphorus by phosphate, with separate aesthetics for Peter and Paul lakes. Add a line of best fit and color it black. Adjust your axes to hide extreme values.
 
-```{r}
+```{r, fig.width=10, fig.height = 6}
 PO4_plot <- ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = po4, group = lakename)) +
   geom_point(aes(shape = lakename, color = lakename)) +
-  labs(x = expression(paste("Total Phosphorus (", mu, "g/L)")), y = expression(paste("Phosphate (", mu, "g/L)")), shape = "Lake Name", color = "Lake Name") +
+  labs(x = expression(paste("Total Phosphorus (", mu, "g/L)")), y = expression(paste("Phosphate (", mu, "g/L)")), shape = "Lake Name", color = "Lake Name", title = "Phosphrous by Phosphate Levels in Peter and Paul Lake") +
   scale_color_stata("s2color") +
   xlim(0, 150) +
   ylim(0, 50) +
@@ -83,7 +83,7 @@ print(PO4_plot)
 
 5. [NTL-LTER] Make three separate boxplots of (a) temperature, (b) TP, and (c) TN, with month as the x axis and lake as a color aesthetic. Then, create a cowplot that combines the three graphs. Make sure that only one legend is present and that graph axes are aligned.
 
-```{r}
+```{r, fig.width=10, fig.height = 6}
 #change month number to month abbreviation 
 PeterPaul.chem.nutrients$month <- month.abb[PeterPaul.chem.nutrients$month]
 
@@ -107,7 +107,6 @@ TP_boxplot <-
   labs(x = "Month", y = expression(paste("Total Phosphorus (", mu, "g/L)")), 
        fill = "Lake Name") +
   scale_fill_stata("s2color") 
-  #ylim(0,160)
 print(TP_boxplot)
 
 #month vs total nitrogen
@@ -118,8 +117,6 @@ TN_boxplot <-
   labs(x = "Month", y = expression(paste("Total Nitrogen (", mu, "g/L)")), 
        fill = "Lake Name") +
   scale_fill_stata("s2color")
-  #xlim(5,8) +
-  #ylim(0,3500)
 print(TN_boxplot)
 
 #create a grid of the three boxplots with the legends removed
@@ -136,7 +133,7 @@ legend <- get_legend(temp_boxplot + guides(color = guide_legend(nrow = 1)) +
                        theme(legend.position = "bottom"))
 
 #plot the three boxplots and manually add in the legend 
-plot_grid(boxplots_combined, legend, ncol = 1, rel_heights = c(1, .1))
+plot_grid(boxplots_combined, legend, ncol = 1, rel_heights = c(1, .1)) 
 
 ```
 
@@ -146,7 +143,7 @@ Question: What do you observe about the variables of interest over seasons and b
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the "Needles" functional group. Plot the dry mass of needle litter by date and separate by NLCD class with a color aesthetic. (no need to adjust the name of each land use)
 
-```{r}
+```{r, fig.width=10, fig.height = 6}
 #first and last date 2016-06-16 UTC--2019-09-25 UTC
 
 needles_graph <- 
@@ -165,7 +162,7 @@ print(needles_graph)
 
 7. [Niwot Ridge] Now, plot the same plot but with NLCD classes separated into three facets rather than separated by color. 
 
-```{r}
+```{r, fig.width=10, fig.height = 6}
 needles_faceted <- 
   ggplot(subset(Neonics, functionalGroup == "Needles"),
          aes(x = collectDate, y = dryMass)) +
