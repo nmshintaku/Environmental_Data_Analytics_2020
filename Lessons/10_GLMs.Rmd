@@ -63,20 +63,23 @@ Are Ozone levels below the threshold for "good" AQI index (0-50)?
 ```{r}
 
 summary(EPAair$Ozone)
-EPAair.subsample <- sample_n(EPAair, 5000)
+EPAair.subsample <- sample_n(EPAair, 5000) #random 5000 samples bc shapiro can only do 5000 samples
 
 # Evaluate assumption of normal distribution
-shapiro.test((EPAair.subsample$Ozone))
+shapiro.test((EPAair.subsample$Ozone)) #pvalue is small so our data is not normally distributed
 ggplot(EPAair, aes(x = Ozone)) +
   geom_histogram() 
-qqnorm(EPAair$Ozone); qqline(EPAair$Ozone)
+#right skewed data 
 
+qqnorm(EPAair$Ozone); qqline(EPAair$Ozone) 
+ 
 O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less")
 O3.onesample
+#mean of 50, alternative hypo is mean < 50, p-value = 2.2e-16 significance 
 
 Ozone.plot <- ggplot(EPAair, aes(x = Ozone)) +
-  #geom_density(stat = "count", fill = "gray") +
-  geom_density(fill = "gray") +
+  geom_density(stat = "count", fill = "gray") +
+  #geom_density(fill = "gray") +
   geom_vline(xintercept = 50, color = "#238b45", lty = 2, size = 0.9) +
   scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
 print(Ozone.plot)
@@ -84,22 +87,24 @@ print(Ozone.plot)
 
 Write a sentence or two about the results of this test. Include both the results of the test and an interpretation that puts the findings in context of the resarch question.
 
-> 
+> We can reject the null hypothesis the the ozone level mean is equal to 50 so we can conclude that the ozone level are below the thresholds of a "good" AQI index with the mean value being below 50. (t = -57.98, df = 6829, P-value = 2.2e-16)
+
+> EPA ozone measurements for 2018-2019 were significantly lower than 50, the AQI threshold for "good" air quality (one sample t-test; t = -57.98, df = 6829, P-value < 2.2e-16 )
 
 ### Two-sample t-test
 The two-sample *t* test is used to test the hypothesis that the mean of two samples is equivalent. Unlike the one-sample tests, a two-sample test requires a second assumption that the variance of the two groups is equivalent. Are Ozone levels different between 2018 and 2019?
 
 ```{r}
-shapiro.test(EPAair$Ozone[EPAair$Year == 2018])
-shapiro.test(EPAair$Ozone[EPAair$Year == 2019])
-var.test(EPAair$Ozone ~ EPAair$Year)
+shapiro.test(EPAair$Ozone[EPAair$Year == 2018]) #not normally distributed
+shapiro.test(EPAair$Ozone[EPAair$Year == 2019]) #not normally distributed
+var.test(EPAair$Ozone ~ EPAair$Year) #variances are significantly different
 
 ggplot(EPAair, aes(x = Ozone, color = as.factor(Year))) +
   geom_freqpoly()
 
 # Format as a t-test
 O3.twosample <- t.test(EPAair$Ozone ~ EPAair$Year)
-O3.twosample
+O3.twosample #reject null that mean are equal, the means are significantly different 
 O3.twosample$p.value
 
 # Format as a GLM
@@ -122,14 +127,30 @@ O3.twosample.wilcox
 
 ### Visualization and interpretation challenge
 
-Create three plots, each with appropriately formatted axes and legends. Choose a non-default color palette.
+Create three plots, each with appropriately formatted axes and legends. Choose a non-default color palette
 
 1. geom_density of ozone divided by year (distinguish between years by adding transparency to the geom_density layer).
 2. geom_boxplot of ozone divided by year . Add letters representing a significant difference between 2018 and 2019 (hint: stat_summary). 
 3. geom_violin of ozone divided by year, with the 0.5 quantile marked as a horizontal line. Add letters representing a significant difference between 2018 and 2019. 
 
 ```{r}
+#1 
+ggplot(EPAair, aes(x = Ozone, fill = as.factor(Year))) +
+  geom_density(alpha = 0.3) +
+  labs(x = "Ozone Levels", y = "Density", fill = "Year") +
+  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
 
+#2
+ggplot(EPAair, aes(x = as.factor(Year), y = Ozone, color = as.factor(Year))) +
+  geom_boxplot() +
+  labs(x = "Year", y = "Ozone", color = "Year") +
+  stat_summary(aes(x = as.factor(Year)))
+
+#3
+ggplot(EPAair, aes(x = as.factor(Year), y = Ozone, color = as.factor(Year))) +
+  geom_violin() +
+  labs(x = "Year", y = "Ozone", color = "Year") +
+  geom_hline(yintercept = 40, lty = 2)
 
 ```
 

@@ -36,11 +36,11 @@ A one-way ANOVA is the same test in practice as a two-sample t-test but for thre
 Does total litter biomass differ among sites at the Niwot Ridge LTER?
 ```{r}
 # Wrangle the data
-Litter.Totals <- Litter %>%
+  Litter.Totals <- Litter %>%
   group_by(plotID, collectDate, nlcdClass) %>%
   summarise(dryMass = sum(dryMass))
 
-# Test for normality. 
+# Test for normality. greater than .05 --> normal distribution
 # Note: the important assumption for GLMs is normality of residuals, 
 # not necessarily normality of raw data. See below when we plot the model.
 shapiro.test(Litter.Totals$dryMass[Litter.Totals$plotID == "NIWO_040"])
@@ -64,7 +64,7 @@ bartlett.test(Litter.Totals$dryMass ~ Litter.Totals$plotID)
 
 # Format ANOVA as aov
 Litter.Totals.anova <- aov(data = Litter.Totals, dryMass ~ plotID)
-summary(Litter.Totals.anova)
+summary(Litter.Totals.anova) #plotID is significant predictor of dry mass 
 
 # Format ANOVA as lm
 Litter.Totals.anova2 <- lm(data = Litter.Totals, dryMass ~ plotID)
@@ -74,12 +74,13 @@ summary(Litter.Totals.anova2)
 # ANOVA is robust against departures from normality.
 plot(Litter.Totals.anova2)
 
-# Post-hoc test
+# Post-hoc test: are any of the plot IDs significantly diff from other plot Ids
 TukeyHSD(Litter.Totals.anova)
 
-# Extract groupings for pairwise relationships
+# Extract groupings for pairwise relationships, plot ID is predictor variable
 Litter.Totals.groups <- HSD.test(Litter.Totals.anova, "plotID", group = TRUE)
 Litter.Totals.groups
+#groups that match are not significantly different
 
 # Graph the results
 Litter.Totals.plot <- ggplot(Litter.Totals, aes(x = plotID, y = dryMass)) +
@@ -91,11 +92,12 @@ Litter.Totals.plot <- ggplot(Litter.Totals, aes(x = plotID, y = dryMass)) +
   labs(x = "Plot ID", y = "Dry Mass (g)") +
   ylim(0, 85)
 print(Litter.Totals.plot)
+#stat_summary: what type of geom (text) and then assign labels in exact order in the dataset
 ```
 
 What information does the output give us? How might we report this information in a report?
 
-> 
+> Does total litter biomass differ among sites at the Niwot Ridge LTER? Yes, litter biomass differs among sites at the Niwot Ridge (figure 1; ANOVA, F11, 198 = 4.813, p < 0.0001)
 
 
 ### Non-parametric equivalent of ANOVA: Kruskal-Wallis Test
@@ -111,8 +113,8 @@ Litter.kw
 
 # There are two functions to run the Dunn Test
 # dunn.test(Litter.Totals$dryMass, Litter.Totals$plotID, kw = T, 
-#           table = F, list = T, method = "holm", altp = T)   #From package dunn.test
-# dunnTest(Litter.Totals$dryMass, Litter.Totals$plotID)                    #From package FSA
+#           table = F, list = T, method = "holm", altp = T) #From package dunn.test
+# dunnTest(Litter.Totals$dryMass, Litter.Totals$plotID) #From package FSA
 ```
 
 ## TWO-WAY ANOVA
@@ -122,7 +124,7 @@ A two-way ANOVA allows us to examine the effects of two categorical explanatory 
 ```{r}
 # Format as aov
 Litter.anova.2way <- aov(data = Litter, dryMass ~ functionalGroup + nlcdClass)
-summary(Litter.anova.2way)
+summary(Litter.anova.2way) #both funcgroup and nlcd is significant predictor on dry mass
 
 # Format as lm
 Litter.anova.2way2 <- lm(data = Litter, dryMass ~ functionalGroup + nlcdClass)
@@ -166,6 +168,19 @@ Litter.groups
 Litter.anova.plot <- ggplot(Litter, aes(y = dryMass, x = nlcdClass, color = functionalGroup)) +
   geom_boxplot()
 print(Litter.anova.plot)
+
+```
+
+```{r}
+library(RColorBrewer)
+litter.anova.newplot <- ggplot(Litter, aes(y = dryMass, x = nlcdClass, color = functionalGroup)) +
+  geom_boxplot() +
+  labs(x = "Landcover Class", y = "Dry Mass (g)", color = "Functional Group") +
+  scale_color_brewer(palette = "Set1") +
+  stat_summary(geom = "text", fun.y = max, vjust = -1, hjust = 1, size = 3.5,
+               label = c("a", "b", "bc", "cd", "d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d")) +
+  ylim(0, 60)
+print(litter.anova.newplot)
 
 ```
 

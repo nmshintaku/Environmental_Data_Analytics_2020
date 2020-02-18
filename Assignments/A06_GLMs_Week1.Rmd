@@ -1,6 +1,6 @@
 ---
 title: "Assignment 6: GLMs week 1 (t-test and ANOVA)"
-author: "Student Name"
+author: "Nikki Shintaku"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -26,12 +26,19 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 2. Change the date column to a date format. Call up `head` of this column to verify.
 
-
 ```{r, message = FALSE}
 #1
+getwd()
+library(tidyverse)
+library(cowplot)
+library(agricolae)
+library(ggthemes)
 
+lake_nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
 
 #2
+lake_nutrients$sampledate <- as.Date(lake_nutrients$sampledate , format = "%Y-%m-%d")
+head(lake_nutrients$sampledate)
 
 ```
 
@@ -40,7 +47,14 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 3. Wrangle your dataset so that it contains only surface depths and only the years 1993-1996, inclusive. Set month as a factor.
 ```{r}
+#Wrangle the data
+lake_nutrients_depth <- 
+  lake_nutrients %>%
+  filter(year4 %in% c("1993", "1994", "1995", "1996")) %>%
+  filter(depth_id == 1)
 
+#change to month to factor
+lake_nutrients_depth$month <- as.factor(lake_nutrients_depth$month)
 
 ```
 
@@ -50,7 +64,7 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 4. Which application of the GLM will you use (t-test, one-way ANOVA, two-way ANOVA with main effects, or two-way ANOVA with interaction effects)? Justify your choice.
 
-> Answer: 
+> Answer: I choose to run a Two-Way ANOVA with interaction effects. An ANOVA is being used because there is three or more groups within the seasons (months) so a T-Test would not be appropriate. A two-way ANOVA is being used because we want to examine the effects of two categorical explanatory variables on a continuous varible. Lake and Month are the two categorical variables being tested on total nitrogen and total phosphorus which are continous variables. Interaction effects is included in the two-way ANOVA because the effects of lake and month may be dependent on each other especially since Peter Lake was manipulated with nutrients over our time period. A two-way ANOVA with interaction effects will examine the individual effects of the explanatory variables as well as the interaction of the explanatory variables.
 
 5. Run your test for TN. Include examination of groupings and consider interaction effects, if relevant.
 
@@ -58,11 +72,35 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 ```{r}
 #5
+TN_interaction <- aov(data = lake_nutrients_depth, tn_ug ~ month * lakename)
+summary(TN_interaction)
+#There is no significant interaction effect on month:lakename; P value = 0.379
 
+TN_interaction_lm <- lm(data = lake_nutrients_depth, tn_ug ~ month * lakename)
+summary(TN_interaction_lm)
+#Peter lake has higher total nitrogen than Paul Lake and do not vary seasonally 
+#no further tests need to be run 
 
 #6
+TP_interaction <- aov(data = lake_nutrients_depth, tp_ug ~ month * lakename)
+summary(TP_interaction)
+#There is a significant interaction effect --> interpret interaction effects only
 
+TP_interaction_lm <- lm(data = lake_nutrients_depth, tp_ug ~ month * lakename)
+summary(TP_interaction_lm)
+#Peter lake has higher total phosphorus than Paul Lake
 
+#Run a post-hoc test for pairwise differences
+TukeyHSD(TP_interaction)
+
+TP_interaction.lake.month <- with(lake_nutrients_depth, 
+                                  interaction(month, lakename))
+TP_interaction.lake.month.aov <- aov(data = lake_nutrients_depth, 
+                                     tp_ug ~ TP_interaction.lake.month)
+
+TP_interaction_groups <- HSD.test(TP_interaction.lake.month.aov, 
+                                  "TP_interaction.lake.month", group = TRUE)
+TP_interaction_groups
 ```
 
 7. Create two plots, with TN (plot 1) or TP (plot 2) as the response variable and month and lake as the predictor variables. Hint: you may use some of the code you used for your visualization assignment. Assign groupings with letters, as determined from your tests. Adjust your axes, aesthetics, and color palettes in accordance with best data visualization practices.
@@ -70,11 +108,49 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 8. Combine your plots with cowplot, with a common legend at the top and the two graphs stacked vertically. Your x axes should be formatted with the same breaks, such that you can remove the title and text of the top legend and retain just the bottom legend. 
 
 ```{r}
+mytheme <- theme_stata(base_size = 14, base_family = "sans", scheme = "s2mono") +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+
+theme_set(mytheme)
+
 #7
+#Total Nitrogen Plot
+TN_plot <- ggplot(lake_nutrients_depth, aes(x = month, y = tn_ug, color = lakename)) +
+  geom_boxplot() +
+  labs(x = "Month", y = expression(paste("Total Nitrogen (", mu, "g/L)")), 
+       color = "Lake Name") +
+  scale_color_stata("s2color") +
+  ylim(0,2100)
 
+print(TN_plot)
 
-#8
+#Total Phosphorus Plot
+TP_plot <- ggplot(lake_nutrients_depth, aes(x = month, y = tp_ug, color = lakename)) +
+  geom_boxplot() +
+  labs(x = "Month", y = expression(paste("Total Phosphorus(", mu, "g/L)")), 
+       color = "Lake Name") +
+  scale_color_stata("s2color") +
+  stat_summary(geom = "text", fun.y = max, vjust = -1, size = 3.5,
+               label = c("cd", "bcd", "d", "ab", "d", "a", 
+                         "d", "abc", "cd", "abcd"),
+               show.legend = FALSE,
+               position = position_dodge2(0.6)) +
+  ylim(0,70)
 
+print(TP_plot)
+
+#8 
+boxplots_nutrients <- 
+  plot_grid(TN_plot + theme(axis.text.x = element_blank(),
+                            axis.ticks.x = element_blank(),
+                            axis.title.x = element_blank()),
+            TP_plot + theme(legend.position = "none"),
+            labels = "AUTO", 
+            align = "h", 
+            axis = "b",
+            ncol = 1)
+print(boxplots_nutrients)
 ```
 
 
