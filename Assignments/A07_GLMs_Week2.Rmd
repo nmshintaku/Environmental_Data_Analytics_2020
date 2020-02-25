@@ -1,6 +1,6 @@
 ---
 title: "Assignment 7: GLMs week 2 (Linear Regression and beyond)"
-author: "Student Name"
+author: "Nikki Shintaku"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -27,9 +27,21 @@ The completed exercise is due on Tuesday, February 25 at 1:00 pm.
 
 ```{r}
 #1
+getwd()
+library(tidyverse)
+library(nlme)
+library(piecewiseSEM)
+library(ggthemes)
 
+NTL.chem <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+NTL.litter <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
 
 #2
+mytheme <- theme_stata(base_size = 14, base_family = "sans", scheme = "s2mono") +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+
+theme_set(mytheme)
 
 ```
 
@@ -47,32 +59,53 @@ Research question: What is the best set of predictors for lake temperatures in J
 
 ```{r}
 #3
-
+lake_temperatures_july <-
+  NTL.chem %>%
+  select(lakename, year4, daynum, depth, temperature_C) %>%
+  filter(daynum > 182 & daynum < 214) %>%
+  na.exclude()
 
 #4
+Temp_AIC <- lm(data = lake_temperatures_july, temperature_C ~ year4 + daynum + depth)
+step(Temp_AIC)
+#AIC is highest when none of the explanatory variables are removed
 
+#Temp AIC is the multiple regression on the recommended variables
+summary(Temp_AIC)
+#year, daynum, and depth are all signficant predictors of lake temperature
 ```
 
 5. What is the final set of explanatory variables that predict temperature from your multiple regression? How much of the observed variance does this model explain?
 
-> Answer: 
+> Answer: Explanatory variables that predict lake temperatures are year, day number, and depth. Year, day number, and depth variables account for ~74% of variance in lake temperature.
 
 6. Run an interaction effects ANCOVA to predict temperature based on depth and lakename from the same wrangled dataset.
 
 ```{r}
 #6
+Temp_ancova_interaction <- lm(data = NTL.chem, temperature_C ~ lakename * depth)
+summary(Temp_ancova_interaction)
 
 ```
 
 7. Is there a significant interaction between depth and lakename? How much variance in the temperature observations does this explain?
 
-> Answer: 
+> Answer: Many of the different lakes have a significant interaction with depth except Ward Lake and depth. Lake name and depth account for ~72% variance in lake temperature observations.
 
 8. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
 ```{r}
 #8
+temp_plot <- ggplot(lake_temperatures_july, aes(x = depth, y = temperature_C, color = lakename)) +
+  geom_point(alpha = 0.5) +
+  labs(x = "Depth (m)", y = expression("Temperature " ( degree~C)), color = "") +
+  #scale_color_viridis_d() +
+  scale_color_stata("s2color") +
+  geom_smooth(method = "lm", se = FALSE) +
+  ylim(0, 35) +
+  theme(legend.spacing.x = unit(0, "cm"))
 
+print(temp_plot)
 ```
 
 9. Run a mixed effects model to predict dry mass of litter. We already know that nlcdClass and functionalGroup have a significant interaction, so we will specify those two variables as fixed effects with an interaction. We also know that litter mass varies across plot ID, but we are less interested in the actual effect of the plot itself but rather in accounting for the variance among plots. Plot ID will be our random effect.
@@ -81,8 +114,11 @@ a. Build and run a mixed effects model.
 b. Check the difference between the marginal and conditional R2 of the model. 
 
 ```{r}
-
-
+litter_mixed_random <- lme(data = NTL.litter,
+                    dryMass ~ nlcdClass * functionalGroup,
+                    random = ~1|plotID)
+summary(litter_mixed_random)
+rsquared(litter_mixed_random)
 ```
 
 b. continued... How much more variance is explained by adding the random effect to the model? 
@@ -92,10 +128,13 @@ b. continued... How much more variance is explained by adding the random effect 
 c. Run the same model without the random effect.
 d. Run an anova on the two tests. 
 ```{r}
- 
+litter_mixed <- gls(data = NTL.litter,
+                    dryMass ~ nlcdClass * functionalGroup)
+summary(litter_mixed)
 
+anova(litter_mixed_random, litter_mixed)
 ```
 
 d. continued... Is the mixed effects model a better model than the fixed effects model? How do you know?
 
-> Answer: 
+> Answer: Mixed effects model is a better model because the AIC is lower than the model without random effects. The low p-value indicates that the models have a significantly different fit.

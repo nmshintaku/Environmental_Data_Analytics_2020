@@ -45,14 +45,19 @@ Let's say we wanted to predict total nitrogen concentrations by depth and by lak
 # main effects
 TNancova.main <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename + depth)
 summary(TNancova.main)
+#lake follows the same slope??, the model knows that lakename is categorical data
 
 # interaction effects
 TNancova.interaction <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename * depth)
 summary(TNancova.interaction)
+#intercept is paul lake at depth of 0, if the lake is paul lake for each increase in depth there is 90 
 
 TNplot <- ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = tn_ug, color = lakename)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Depth (m)", y = expression(paste("Total Nitrogen (", mu, "g/L)")), color = "") +
+  #scale_color_brewer(palette = "Dark2") +
+  scale_color_manual(values = c("darkblue", "lightblue")) +
   xlim(0, 10)
 print(TNplot)
 
@@ -102,8 +107,11 @@ Next, we will build a hierarchical model. We will use the package `nlme` for our
 TempTest.mixed <- lme(data = NTL.summertemp,
                      temperature_C ~ year4, 
                      random = ~1|lakename)
+#random variable is 1, grouped by lakename, random effects need to be categorical 
 summary(TempTest.mixed)
+#not testing random effect so no p-value 
 rsquared(TempTest.mixed)
+#marginal r could explain about 7% with out random effect, conditional r could explain 11% of our data with random effect of lakename in our model 
 
 # Compare the random effects model with the fixed effects model
 TempTest.fixed <- gls(data = NTL.summertemp,
@@ -113,11 +121,14 @@ summary(TempTest.fixed)
 anova(TempTest.mixed, TempTest.fixed)
 # The lower the AIC, the better.
 # The p-value tells us whether those models have a significantly different fit
+#mixed effects model is the better model 
 
+#intercept and slope is from the temptest.mixed model 
 NTL.tempmodel <-
 ggplot(NTL.summertemp, aes(x = year4, y = temperature_C, color = lakename)) +
   geom_point() +
   scale_color_viridis_d() +
+  #geom_smooth(method = "lm", se = FALSE) +
   geom_abline(intercept = -97.72, slope = 0.06) +
   # make it look better
   labs(x = "", y = expression("Temperature " ( degree~C)), color = "") +
@@ -127,4 +138,4 @@ print(NTL.tempmodel)
 
 Question: How would you interpret the collective results of your mixed effects model in the context of the study question?
 
-> ANSWER: 
+> ANSWER: surface waters have warmed 1.8 degrees over 30 years (slope 0.6 * 30 years) 
