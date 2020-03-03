@@ -1,6 +1,6 @@
 ---
 title: "Assignment 8: Time Series Analysis"
-author: "Student Name"
+author: "Nikki Shintaku"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -29,7 +29,31 @@ The completed exercise is due on Tuesday, March 3 at 1:00 pm.
 * Import the ten datasets from the Ozone_TimeSeries folder in the Raw data folder. These contain ozone concentrations at Garinger High School in North Carolina from 2010-2019 (the EPA air database only allows downloads for one year at a time). Call these GaringerOzone201*, with the star filled in with the appropriate year in each of ten cases.
 
 ```{r, message = FALSE}
+getwd()
+library(tidyverse)
+library(lubridate)
+library(zoo)
+library(trend)
+library(ggthemes)
 
+#Set a ggplot theme
+mytheme <- theme_stata(base_size = 14, base_family = "sans", scheme = "s2mono") +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+
+theme_set(mytheme)
+
+#import datasets 
+GaringerOzone2010 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2010_raw.csv")
+GaringerOzone2011 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2011_raw.csv")
+GaringerOzone2012 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2012_raw.csv")
+GaringerOzone2013 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2013_raw.csv")
+GaringerOzone2014 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2014_raw.csv")
+GaringerOzone2015 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2015_raw.csv")
+GaringerOzone2016 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2016_raw.csv")
+GaringerOzone2017 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2017_raw.csv")
+GaringerOzone2018 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2018_raw.csv")
+GaringerOzone2019 <- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2019_raw.csv")
 
 ```
 
@@ -41,25 +65,31 @@ The completed exercise is due on Tuesday, March 3 at 1:00 pm.
 
 4. Wrangle your dataset so that it only contains the columns Date, Daily.Max.8.hour.Ozone.Concentration, and DAILY_AQI_VALUE. 
 
-5. Notice there are a few days in each year that are missing ozone concentrations. We want to generate a daily dataset, so we will need to fill in any missing days with NA. Create a new data frame that contains a sequence of dates from 2010-01-01 to 2019-12-13 (hint: `as.data.frame(seq())`). Call this new data frame Days. Rename the column name in Days to "Date".
+5. Notice there are a few days in each year that are missing ozone concentrations. We want to generate a daily dataset, so we will need to fill in any missing days with NA. Create a new data frame that contains a sequence of dates from 2010-01-01 to 2019-12-31 (hint: `as.data.frame(seq())`). Call this new data frame Days. Rename the column name in Days to "Date".
 
 6. Use a `left_join` to comine the data frames. Specify the correct order of data frames within this function so that the final dimensions are 3652 rows and 3 columns. Call your combined data frame GaringerOzone. 
 
 ```{r}
 # 2 
-
+#Using rbind to combine datsets; all datasets have the same column titles
+GaringerOzone <- rbind(GaringerOzone2010, GaringerOzone2011, GaringerOzone2012, GaringerOzone2013, GaringerOzone2014, GaringerOzone2015, GaringerOzone2016, GaringerOzone2017, GaringerOzone2018, GaringerOzone2019)
 
 # 3
-
+GaringerOzone$Date <- as.Date(GaringerOzone$Date, format = "%m/%d/%Y")
+class(GaringerOzone$Date)
 
 # 4
-
+GaringerOzone_wrangled <- 
+  GaringerOzone %>%
+  select(Date, Daily.Max.8.hour.Ozone.Concentration, DAILY_AQI_VALUE)
 
 # 5
-
+Days <- as.data.frame(seq(as.Date('2010-01-01'), as.Date('2019-12-31'), by = 'days'))
+names(Days)[1] <- "Date"
+class(Days$Date)
 
 # 6
-
+GaringerOzone <- left_join(Days, GaringerOzone_wrangled)
 
 ```
 
@@ -68,8 +98,16 @@ The completed exercise is due on Tuesday, March 3 at 1:00 pm.
 7. Create a ggplot depicting ozone concentrations over time. In this case, we will plot actual concentrations in ppm, not AQI values. Format your axes accordingly.
 
 ```{r}
+Ozoneplot <- 
+  ggplot(GaringerOzone, aes(x = Date, y = Daily.Max.8.hour.Ozone.Concentration)) +
+  geom_point(size = 0.5, alpha = 0.5) +
+  geom_line() +
+  labs(y = "Ozone Concentration (ppm)") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  ylim(0, 0.085) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-
+plot(Ozoneplot)
 ```
 
 ## Time Series Analysis
@@ -78,7 +116,7 @@ Study question: Have ozone concentrations changed over the 2010s at this station
 
 8. Use a linear interpolation to fill in missing daily data for ozone concentration. Why didn't we use a piecewise constant or spline interpolation?
 
-> Answer: 
+> Answer: We shouldn't use a piecewise constant because we don't want to assume that missing data is equal to the measurement made nearest to that date. Ozone concentration can vary from day to day so that might not be the best interpolation method. In addition, spline interpolation is not used because our data looks linear rather than quadratic so spline interpolation may not give us the best results. 
 
 9. Create a new data frame called GaringerOzone.monthly that contains aggregated data: mean ozone concentrations for each month. In your pipe, you will need to first add columns for year and month to form the groupings. In a separate line of code, create a new Date column with each month-year combination being set as the first day of the month (this is for graphing purposes only)
 
@@ -86,7 +124,7 @@ Study question: Have ozone concentrations changed over the 2010s at this station
 
 11. Run a time series analysis. In this case the seasonal Mann-Kendall is most appropriate; why is this?
 
-> Answer: 
+> Answer: Seasonal Mann-Kendall is appropriate because we don't want to assume temporal autocorrelation, but we are using monthly data so there is seasonality. We want to see if ozone concentration has changed over the years while incorporating a seasonal component. 
 
 12. To figure out the slope of the trend, run the function `sea.sens.slope` on the time series dataset. 
 
@@ -94,25 +132,46 @@ Study question: Have ozone concentrations changed over the 2010s at this station
 
 ```{r}
 # 8
-
+#linear interpolation using na.approx
+GaringerOzone$Daily.Max.8.hour.Ozone.Concentration <- na.approx(GaringerOzone$Daily.Max.8.hour.Ozone.Concentration)
 
 # 9
+GaringerOzone.Monthly <- 
+  GaringerOzone %>%
+  mutate(Year = year(Date), 
+         Month = month(Date)) %>%
+  group_by(Year, Month) %>%
+  summarise(Ozone.Concentration.mean = mean(Daily.Max.8.hour.Ozone.Concentration)) 
 
+GaringerOzone.Monthly$Date <- as.Date(paste(GaringerOzone.Monthly$Year, 
+                                                GaringerOzone.Monthly$Month, 
+                                                1, sep="-"), 
+                                          format = "%Y-%m-%d")
 
 # 10
-
+GaringerOzone.monthly.ts <- ts(GaringerOzone.Monthly$Ozone.Concentration.mean, frequency = 12, 
+                        start = c(2010, 1, 1), end = c(2019, 12, 1))
 
 # 11
- 
+GaringerOzone.monthly.trend <- smk.test(GaringerOzone.monthly.ts)
 
 # 12
-
+sea.sens.slope(GaringerOzone.monthly.ts)
+GaringerOzone.monthly.trend
+summary(GaringerOzone.monthly.trend)
 
 # 13
+GaringerOzone.monthly.plot <- 
+  ggplot(GaringerOzone.Monthly, aes(x = Date, y = Ozone.Concentration.mean)) +
+  geom_point() +
+  geom_line() +
+  labs(y = "Mean Ozone Concentration (ppm)") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-
+print(GaringerOzone.monthly.plot)
 ```
 
 14. To accompany your graph, summarize your results in context of the research question. Include output from the statistical test in parentheses at the end of your sentence. Feel free to use multiple sentences in your interpretation.
 
-> Answer: 
+> Answer: There is a low to no significant trend with ozone concentrations over time at Garinger High School. There is no significant seasons that are an indicator of ozone concentration. (Seasonal Mann-Kendall, z = -1.963, p-value = 0.04965)

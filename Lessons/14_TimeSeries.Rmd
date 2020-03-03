@@ -193,11 +193,11 @@ In general, detecting a monotonic trend requires a long sequence of data with fe
 
 Adjusting the data may be necessary to fulfill the assumptions of a trend test. These adjustments include **aggregation**, **subsampling**, and **interpolation**. What do each of these mean, and why might we want to use them?
 
-> aggregation: 
+> aggregation: Putting data together; bundling data to create a bigger dataset, such as daily to yearly; fill in msissing data gap by aggregating daily to monthly 
 
-> subsampling: 
+> subsampling: only looking at sections of your data
 
-> interpolation: 
+> interpolation: if you have gaps, you can generate points to fill in the gaps 
 
 Common interpolation methods: 
 
@@ -281,12 +281,13 @@ EnoDischarge.late.monthly$Date <- as.Date(paste(EnoDischarge.late.monthly$Year,
 # Generate time series (smk.test needs ts, not data.frame)
 EnoDischarge.late.monthly.ts <- ts(EnoDischarge.late.monthly$Discharge, frequency = 12, 
                         start = c(1985, 10, 1), end = c(2019, 12, 1))
-# Run SMK test
+# Run SMK test only on a time series object
 EnoDischarge.late.trend <- smk.test(EnoDischarge.late.monthly.ts)
 
 # Inspect results
 EnoDischarge.late.trend
 summary(EnoDischarge.late.trend)
+#no significant trend over time bc p-value is 0.88 (not less than 0.05)
 
 EnoDischarge.monthly <-
 ggplot(EnoDischarge.late.monthly, aes(x = Date, y = Discharge)) +
@@ -297,10 +298,9 @@ print(EnoDischarge.monthly)
 
 What would we conclude based on these findings? 
 
->
+> There is no significant trend with discharge over time in the Eno River (Seasonal Mann-Kendall, z = -0.13967, p-value = 0.8889). 
  
 If a significant trend was present, we could compute a **Sen's Slope** to quantify that trend (`sens.slope` function in the trend package).
-
 
 
 ## Forecasting with Autoregressive and Moving Average Models (ARMA)
