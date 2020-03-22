@@ -1,6 +1,6 @@
 ---
 title: "Assignment 9: Spatial Analysis"
-author: "Student Name"
+author: "Nikki Shintaku"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -15,7 +15,7 @@ This exercise accompanies the lessons in Environmental Data Analytics on spatial
 1. Use this document to create code for a map. You will **NOT** be turning in the knitted Rmd file this time, only the pdf output for a map.
 2. When you have produced your output, submit **only** the pdf file for the map, without any code. Please name your file "StudentName_A09_Spatial.pdf".
 
-The completed exercise is due on Thursday, March 19 at 1:00 pm.
+The completed exercise is due on Thursday, March 24 at 1:00 pm.
 
 ## Create a map
 
@@ -31,6 +31,93 @@ Here are your three options:
 * Basin boundary layer
 * Gage layer
 * Tabular data (as an aesthetic for one of the layers)
+
+```{r}
+library("readr")
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+library("purrr")
+library("sf")
+library("ggmap")
+library("here")
+
+here()
+#Spatial Data
+basins_raw <- st_read(here("data", "spatial_data", "bas_nonref_SEPlains.shp"))
+gages_raw <- st_read(here("data", "spatial_data", "gagesII_9322_sept30_2011.shp"))
+southeast_state_bounds_raw <- st_read(here("data", "spatial_data", "southeast_state_bounds.shp"))
+
+#tabular data
+tabular_climate_raw <- read_csv(here("data", "tabular_data", "conterm_climate.txt"))
+
+#check coordinate reference system
+st_crs(basins_raw)
+st_crs(gages_raw)
+st_crs(southeast_state_bounds_raw)
+
+my_proj4 <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+my_epsg <- 5070
+
+#Set basins projections
+basins_seplains <- basins_raw
+st_crs(basins_seplains) <- my_proj4
+basins_seplains <- basins_seplains %>%
+  st_set_crs(my_epsg)
+st_crs(basins_seplains)
+
+#set gages projections
+gages <- gages_raw
+st_crs(gages) <- my_proj4
+gages <- gages %>%
+  st_set_crs(my_epsg)
+st_crs(gages)
+
+#Set for new name
+southeast_state_bounds <- southeast_state_bounds_raw
+st_crs(southeast_state_bounds) <- my_proj4
+southeast_state_bounds <- southeast_state_bounds %>%
+  st_set_crs(my_epsg)
+st_crs(southeast_state_bounds)
+
+#check again
+st_crs(basins_seplains)
+st_crs(gages)
+st_crs(southeast_state_bounds)
+```
+
+```{r}
+#getting data for map 
+#selecting NC as a state
+nc_state_bounds_geom <- southeast_state_bounds %>%
+  filter(NAME == "North Carolina") %>%
+  st_geometry()
+head(nc_state_bounds_geom)
+
+#selecting gages that intersect in NC bounds
+nc_gages <- gages %>%
+  st_intersection(nc_state_bounds_geom)
+head(nc_gages)
+
+#getting basins that intersect in NC bounds **may need to get basins that fall outside of bounds too 
+nc_basins_seplains <- basins_seplains %>%
+  st_intersection(nc_state_bounds_geom)
+head(nc_basins_seplains)
+
+nc_gages_buffer_100m <- st_buffer(nc_gages, dist = 100) # make a buffer around the stream gages in NC
+
+```
+
+```{r}
+#getting tabular data ready for map
+# join the tabular data to nc_gages
+nc_gages_climate <- nc_gages %>%
+  left_join(my_tabular_data_raw, by = "STAID")
+names(nc_gages_climate)
+
+
+
+```
 
 3. Create a map of any other spatial data. This could be data from the spatial lesson, data from our other course datasets (e.g., the Litter dataset includes latitude and longitude of trap sites), or another dataset of your choosing.  Your map should include: 
 
