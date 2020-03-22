@@ -41,6 +41,7 @@ library("purrr")
 library("sf")
 library("ggmap")
 library("here")
+library(maps)
 
 here()
 #Spatial Data
@@ -112,12 +113,28 @@ nc_gages_buffer_100m <- st_buffer(nc_gages, dist = 100) # make a buffer around t
 #getting tabular data ready for map
 # join the tabular data to nc_gages
 nc_gages_climate <- nc_gages %>%
-  left_join(my_tabular_data_raw, by = "STAID")
+  left_join(tabular_climate_raw, by = "STAID")
 names(nc_gages_climate)
 
+```
 
+```{r}
+#creating the pdf
+pdf(here("outputs", "Shintaku_A09_Spatial.pdf"), width = 11, height = 8.5)
+ggplot() +
+  geom_sf(data = nc_state_bounds_geom, fill = "white", show.legend = "line") +
+  geom_sf(data = nc_basins_seplains, alpha = 0.25) +
+  geom_sf(data = nc_gages, lwd = 1, show.legend = "nc_gages") +
+  geom_sf(data = nc_gages_climate, aes(color = -T_AVG_SITE), size = 2) +
+  scale_color_gradientn(colors = rainbow(4)) +
+  labs(color = "Avg. Annual Air Temp (C)") +
+  xlab("Longitude") + ylab("Latitude") +
+  ggtitle("Avg. Annual Air Temp at Gage Sites in North Carolina") +
+  theme_bw()
+dev.off()
 
 ```
+
 
 3. Create a map of any other spatial data. This could be data from the spatial lesson, data from our other course datasets (e.g., the Litter dataset includes latitude and longitude of trap sites), or another dataset of your choosing.  Your map should include: 
 
