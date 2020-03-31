@@ -164,8 +164,9 @@ Rivers_lakes_combined <- full_join(Rivers, Lakes)
 11. Create one graph that compares the data for lakes and/or rivers. This option is flexible; choose a relationship (or relationships) that seem interesting to you, and think about the implications of your findings. This graph should be edited so it follows best data visualization practices. 
 
 (You may choose to run a statistical test or add a line of best fit; this is optional but may aid in your interpretations)
-```{r}
-ggplot(Rivers_lakes_combined, aes(x = Lakes.Assessed.acres, y = Lakes.Impaired.acres, fill = Lakes.Impaired.percent.TMDL)) +
+```{r fig.width= 8, fig.height= 8}
+ggplot(Rivers_lakes_combined, aes(x = Lakes.Assessed.acres, y = Lakes.Impaired.acres, 
+                                  fill = Lakes.Impaired.percent.TMDL)) +
   geom_point(shape = 21, size = 2, alpha = 0.7) +
   scale_fill_viridis(option = "magma", begin = 0.2, end = 0.9, direction = -1) +
   ylim(0, 50000) +
