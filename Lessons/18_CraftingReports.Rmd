@@ -31,6 +31,11 @@ A handy cheat sheet for R markdown can be found [here](https://www.rstudio.com/w
 
 <Fill in our discussion below with bullet points. Use italics and bold for emphasis (hint: use the cheat sheets to figure out how to make bold and italic text).>
 
+* *italic*
+* **bold**
+* **Documentation** of data pipeline steps 
+* Store *code*, *visualization*, and *text* in one place
+
 ## TEXT EDITING CHALLENGE
 
 Create a table below that details the example datasets we have been using in class. The first column should contain the names of the datasets and the second column should include some relevant information about the datasets. (Hint: use the cheat sheets to figure out how to make a table in Rmd)
